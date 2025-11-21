@@ -1,3 +1,4 @@
+import librosa
 import librosa as lr
 import numpy as np
 
@@ -25,3 +26,22 @@ class AudioAnalysis:
             "energy": float(energy),
             "brightness": (brightness),
         }
+
+def compute_segment_brightness(audio_path, segments=25):
+    y, sr = lr.load(audio_path)
+
+    total_len = len(y)
+    seg_len = total_len // segments
+
+    segment_values = []
+
+    for i in range(segments):
+        start = i * seg_len
+        end = (i + 1) * seg_len if i < segments - 1 else total_len
+
+        seg = y[start:end]
+
+        energy = float(np.sum(seg ** 2))
+        segment_values.append(energy)
+
+    return segment_values
