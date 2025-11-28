@@ -29,5 +29,8 @@ def segment_audio(audio_path, segment_duration=0.5):
 
         brightness_values.append(brightness)
 
+    # tempo 추출
+    tempo, _ = librosa.beat.beat_track(y = y, sr = sr)
+
     # segment별 brightness 리스트 반환
-    return brightness_values
+    return brightness_values, tempo

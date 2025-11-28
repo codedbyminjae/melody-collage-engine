@@ -41,15 +41,16 @@ def alpha_blend(canvas, img, x, y, alpha):
 
 
 # 단일 이미지 처리
-def process_image(img, scale, base_min, base_max):
+def process_image(img, scale, tempo_norm, base_min, base_max):
     base = random.randint(base_min, base_max)
     size = int(base * scale)
     size = max(80, min(600, size))
 
     img = cv2.resize(img, (size, size))
 
-    sat = 0.3 + scale * 1.4
-    img = adjust_saturation(img, sat)
+    # tempo 기반 채도 조절 반영
+    sat_factor = (0.3 + scale * 1.4) * (0.4 + tempo_norm)
+    img = adjust_saturation(img, sat_factor)
 
     angle = random.uniform(-5, 5)
     img = random_rotate(img, angle)
@@ -58,17 +59,21 @@ def process_image(img, scale, base_min, base_max):
 
 
 # 콜라주 생성
-def build_layer_collage(images, scale_factors,
-                        canvas_w=1800, canvas_h=2400,
-                        base_min=180, base_max=380):
+def build_layer_collage(images, scale_factors, tempo_norm, canvas_w=1800, canvas_h=2400, base_min=180, base_max=380):
 
     canvas = np.zeros((canvas_h, canvas_w, 3), dtype=np.uint8)
 
     for idx, img in enumerate(images):
         scale = scale_factors[idx]
 
-        # 이미지 처리(크기+채도+회전)
-        processed, size = process_image(img, scale, base_min, base_max)
+        # 인트로/아웃트로 강조
+        if idx < 40:
+            scale *= 0.85
+        elif idx > 200:
+            scale *= 1.15
+
+        # tempo_norm 넘겨주며 함께 이미지 처리(크기+채도+회전)
+        processed, size = process_image(img, scale, tempo_norm, base_min, base_max)
 
         # 랜덤 위치
         x = random.randint(0, canvas_w - size)

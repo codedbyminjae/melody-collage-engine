@@ -19,13 +19,20 @@ def normalize_brightness(brightness, target=240):
 def main():
     print("Melody Collage Engine 시작")
 
-    # 1) 음악 brightness 추출
+    # 1) brightness + tempo 추출
     audio_path = "../data/music/epic1.mp3"
-    brightness = segment_audio(audio_path, segment_duration=0.5)
+    brightness, tempo = segment_audio(audio_path, segment_duration=0.5)
+    tempo = float(tempo[0]) if hasattr(tempo, "__len__") else float(tempo)
+
+    # brightness 길이 240개 맞춤
     brightness = normalize_brightness(brightness)
     print(f"음악 segment 수: {len(brightness)}")
 
-    # 2) 이미지 로드 & 240장 확장
+    # tempo 정규화 (0~1)
+    tempo_norm = min(max((tempo - 60) / 120, 0), 1)
+    print(f"tempo: {tempo:.2f}, tempo_norm: {tempo_norm:.3f}")
+
+    # 2) 이미지 로드
     images = load_images("../data/images", target_count=240, resize_to=256)
     print("이미지 로드 완료")
 
@@ -35,14 +42,14 @@ def main():
 
     # 4) 콜라주 생성
     collage = build_layer_collage(
-        images, scales,
+        images, scales, tempo_norm,
         canvas_w=1800, canvas_h=2400,
         base_min=180, base_max=380
     )
 
-    # 5) 저장
+    # 5) 결과 저장
     os.makedirs("../results", exist_ok=True)
-    output_path = "../results/layer_collage.jpg"
+    output_path = "../results/collage.jpg"
     cv2.imwrite(output_path, collage)
 
     print(f"완료! 저장 경로: {output_path}")
