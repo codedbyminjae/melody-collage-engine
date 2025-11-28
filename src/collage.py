@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import random
+from config import INTRO_CUTOFF, OUTRO_CUTOFF, PREVIEW, PREVIEW_DELAY
 
 
 # 회전
@@ -40,19 +41,20 @@ def alpha_blend(canvas, img, x, y, alpha):
 
 
 # 단일 이미지 처리
-def process_image(img, scale, tempo_norm, energy_norm, idx, base_min, base_max):
-    # 크기 결정
+def process_image(img, scale, tempo_norm, energy_norm, idx,
+                  base_min, base_max):
+    # 크기
     base = random.randint(base_min, base_max)
     size = int(base * scale)
     size = max(80, min(600, size))
 
     img = cv2.resize(img, (size, size))
 
-    # tempo 기반 채도 조절
+    # 템포 기반 채도 조절
     sat_factor = (0.3 + scale * 1.4) * (0.4 + tempo_norm)
     img = adjust_saturation(img, sat_factor)
 
-    # 에너지 기반 회전: 조용한 구간=작은 회전 / 에너지 높은 구간=강한 회전
+    # 에너지 기반 회전
     rotation_range = 10 + energy_norm[idx] * 40
     angle = random.uniform(-rotation_range, rotation_range)
     img = random_rotate(img, angle)
@@ -62,8 +64,7 @@ def process_image(img, scale, tempo_norm, energy_norm, idx, base_min, base_max):
 
 # 콜라주 생성
 def build_layer_collage(images, scale_factors, tempo_norm, energy_norm,
-                        canvas_w=1800, canvas_h=2400,
-                        base_min=180, base_max=380):
+                        canvas_w, canvas_h, base_min, base_max):
 
     canvas = np.zeros((canvas_h, canvas_w, 3), dtype=np.uint8)
 
@@ -71,23 +72,30 @@ def build_layer_collage(images, scale_factors, tempo_norm, energy_norm,
         scale = scale_factors[idx]
 
         # 인트로/아웃트로 강조
-        if idx < 40:
+        if idx < INTRO_CUTOFF:
             scale *= 0.85
-        elif idx > 200:
+        elif idx > OUTRO_CUTOFF:
             scale *= 1.15
 
-        # 에너지 + 템포 + 밝기 모두 반영해 이미지 처리
+        # 이미지 처리
         processed, size = process_image(
-            img, scale, tempo_norm, energy_norm, idx, base_min, base_max
+            img, scale, tempo_norm, energy_norm, idx,
+            base_min, base_max
         )
 
-        # 랜덤 위치
+        # 위치
         x = random.randint(0, canvas_w - size)
         y = random.randint(0, canvas_h - size)
 
-        # 투명도(밝기 기반)
+        # 투명도
         alpha = min(max(0.65 + scale * 0.25, 0.4), 1.0)
 
         canvas = alpha_blend(canvas, processed, x, y, alpha)
+
+        # 실시간 화면 반영
+        if PREVIEW:
+            preview_img = cv2.resize(canvas, None, fx=0.4, fy=0.3)
+            cv2.imshow("Preview", preview_img)
+            cv2.waitKey(PREVIEW_DELAY)
 
     return canvas

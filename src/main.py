@@ -6,60 +6,62 @@ from audio import segment_audio
 from image import load_images
 from scaling import compute_scale
 from collage import build_layer_collage
+from config import CANVAS_W, CANVAS_H, TARGET_COUNT, RESIZE_TO, BASE_MIN, BASE_MAX
 
 
-# brightness를 240개로 맞추는 함수
-def normalize_target(arr, target=240):
+def normalize_target(arr, target):
     arr = arr[:target]
     if len(arr) < target:
-        last = arr[-1]
-        arr += [last] * (target - len(arr))
+        arr += [arr[-1]] * (target - len(arr))
     return arr
 
 
 def main():
     print("Melody Collage Engine 시작")
 
-    # 1) brightness + tempo 추출
-    audio_path = "../data/music/epic1.mp3"
-    brightness, tempo, energy= segment_audio(audio_path, segment_duration=0.5)
-
-    # tempo numpy 경고 부분 처리
+    # 1) 음악 분석
+    brightness, tempo, energy = segment_audio("../data/music/epic1.mp3", segment_duration=0.5)
     tempo = float(tempo[0]) if hasattr(tempo, "__len__") else float(tempo)
+    print(f"tempo(raw): {tempo:.2f}")
 
-    # brightness / energy 길이 240개 맞춤
-    brightness = normalize_target(brightness, 240)
-    energy = normalize_target(energy, 240)
-    print(f"음악 segment 수: {len(brightness)}")
+    brightness = normalize_target(brightness, TARGET_COUNT)
+    energy = normalize_target(energy, TARGET_COUNT)
+    print(f"segment 개수: {len(brightness)}")
 
-    # tempo 정규화 (0~1)
     tempo_norm = min(max((tempo - 60) / 120, 0), 1)
-    print(f"tempo: {tempo:.2f}, tempo_norm: {tempo_norm:.3f}")
-
-    # energy 정규화 (segment별)
-    energy_arr = np.array(energy)
-    energy_norm = (energy_arr - np.min(energy_arr)) / (np.max(energy_arr) - np.min(energy_arr))
+    energy_norm = (np.array(energy) - min(energy)) / (max(energy) - min(energy))
     energy_norm = energy_norm.tolist()
 
     # 2) 이미지 로드
-    images = load_images("../data/images", target_count=240, resize_to=256)
+    images = load_images("../data/images", TARGET_COUNT, RESIZE_TO)
     print("이미지 로드 완료")
 
-    # 3) brightness → scale 변환
+    # 3) 스케일 계산
     scales = compute_scale(brightness)
     print("스케일 계산 완료")
 
     # 4) 콜라주 생성
     collage = build_layer_collage(
-        images, scales, tempo_norm, energy_norm, canvas_w=1800, canvas_h=2400, base_min=180, base_max=380
+        images, scales, tempo_norm, energy_norm,
+        canvas_w=CANVAS_W, canvas_h=CANVAS_H,
+        base_min=BASE_MIN, base_max=BASE_MAX
     )
+    print("콜라주 생성 완료")
 
-    # 5) 결과 저장
+    # 5) 저장
     os.makedirs("../results", exist_ok=True)
-    output_path = "../results/collage.jpg"
-    cv2.imwrite(output_path, collage)
+    output = "../results/collage.jpg"
+    cv2.imwrite(output, collage)
+    print(f"저장 완료 → {output}")
 
-    print(f"완료! 저장 경로: {output_path}")
+    # ENTER로 종료
+    print("프리뷰 창에서 ENTER를 누르면 종료됩니다.")
+
+    while True:
+        if cv2.waitKey(0) & 0xFF in [13, 10, ord('\r')]:
+            break
+
+    cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
