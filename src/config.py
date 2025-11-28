@@ -15,3 +15,7 @@ OUTRO_CUTOFF = 200      # 마지막 구간 강조
 # 시각화(preview) 설정
 PREVIEW = True          # 실시간 생성 과정 보기
 PREVIEW_DELAY = 30      # ms 단위 (30~50 추천)
+
+# 콜라주 모드 선택
+# MODE = "random" # 랜덤 콜라주
+MODE = "flow" # 음악 흐름 기반 모드
