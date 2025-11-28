@@ -25,7 +25,6 @@ def alpha_blend(canvas, img, x, y, alpha):
     h, w = img.shape[:2]
     H, W = canvas.shape[:2]
 
-    # 캔버스 밖이면 잘라내기
     if x + w > W or y + h > H:
         w = max(0, W - x)
         h = max(0, H - y)
@@ -41,25 +40,30 @@ def alpha_blend(canvas, img, x, y, alpha):
 
 
 # 단일 이미지 처리
-def process_image(img, scale, tempo_norm, base_min, base_max):
+def process_image(img, scale, tempo_norm, energy_norm, idx, base_min, base_max):
+    # 크기 결정
     base = random.randint(base_min, base_max)
     size = int(base * scale)
     size = max(80, min(600, size))
 
     img = cv2.resize(img, (size, size))
 
-    # tempo 기반 채도 조절 반영
+    # tempo 기반 채도 조절
     sat_factor = (0.3 + scale * 1.4) * (0.4 + tempo_norm)
     img = adjust_saturation(img, sat_factor)
 
-    angle = random.uniform(-5, 5)
+    # 에너지 기반 회전: 조용한 구간=작은 회전 / 에너지 높은 구간=강한 회전
+    rotation_range = 10 + energy_norm[idx] * 40
+    angle = random.uniform(-rotation_range, rotation_range)
     img = random_rotate(img, angle)
 
     return img, size
 
 
 # 콜라주 생성
-def build_layer_collage(images, scale_factors, tempo_norm, canvas_w=1800, canvas_h=2400, base_min=180, base_max=380):
+def build_layer_collage(images, scale_factors, tempo_norm, energy_norm,
+                        canvas_w=1800, canvas_h=2400,
+                        base_min=180, base_max=380):
 
     canvas = np.zeros((canvas_h, canvas_w, 3), dtype=np.uint8)
 
@@ -72,17 +76,18 @@ def build_layer_collage(images, scale_factors, tempo_norm, canvas_w=1800, canvas
         elif idx > 200:
             scale *= 1.15
 
-        # tempo_norm 넘겨주며 함께 이미지 처리(크기+채도+회전)
-        processed, size = process_image(img, scale, tempo_norm, base_min, base_max)
+        # 에너지 + 템포 + 밝기 모두 반영해 이미지 처리
+        processed, size = process_image(
+            img, scale, tempo_norm, energy_norm, idx, base_min, base_max
+        )
 
         # 랜덤 위치
         x = random.randint(0, canvas_w - size)
         y = random.randint(0, canvas_h - size)
 
-        # 투명도
+        # 투명도(밝기 기반)
         alpha = min(max(0.65 + scale * 0.25, 0.4), 1.0)
 
-        # 블렌딩
         canvas = alpha_blend(canvas, processed, x, y, alpha)
 
     return canvas

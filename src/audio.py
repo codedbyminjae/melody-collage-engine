@@ -12,6 +12,7 @@ def segment_audio(audio_path, segment_duration=0.5):
     total_segments = len(y) // seg_samples
 
     brightness_values = []
+    energy_value = []
 
     for i in range(total_segments): # 전체 segment 개수만큼 반복 -> 각 segment 에서 밝기를 추출
         # segment 슬라이싱
@@ -29,8 +30,12 @@ def segment_audio(audio_path, segment_duration=0.5):
 
         brightness_values.append(brightness)
 
+        # 에너지
+        energy = float(np.sum(np.abs(seg)))
+        energy_value.append(energy)
+
     # tempo 추출
     tempo, _ = librosa.beat.beat_track(y = y, sr = sr)
 
     # segment별 brightness 리스트 반환
-    return brightness_values, tempo
+    return brightness_values, tempo, energy_value
