@@ -1,41 +1,37 @@
 import librosa
 import numpy as np
 
-# 음악을 segment 단위로 나누고 각 구간의 spectral centroid(밝기)를 계산한다.
+# 오디오를 segment 단위로 나누고, 각 segment의 밝기(centroid)와 에너지 계산
 def segment_audio(audio_path, segment_duration=0.5):
 
-    # 음악 로드 (waveform y, sampling rate sr)
-    y, sr = librosa.load(audio_path, sr=None)
+    # 음악 불러오기
+    y, sr = librosa.load(audio_path, sr=None) # librosa 라이브러리 참조 부분
 
-    # segment 길이(샘플 단위) 계산
-    seg_samples = int(segment_duration * sr)
-    total_segments = len(y) // seg_samples
+    # segment 길이 (sample 단위)
+    seg_len = int(segment_duration * sr)
+    total_segments = len(y) // seg_len
 
-    brightness_values = []
-    energy_value = []
+    brightness_list = [] # 밝기 저장
+    energy_list = [] # 에너지 저장
 
-    for i in range(total_segments): # 전체 segment 개수만큼 반복 -> 각 segment 에서 밝기를 추출
-        # segment 슬라이싱
-        start = i * seg_samples
-        end = (i + 1) * seg_samples
+    # segment 반복 처리
+    for i in range(total_segments):
+
+        start = i * seg_len
+        end   = (i + 1) * seg_len
+
         seg = y[start:end]
 
-        if len(seg) == 0:
-            continue
-
-        # spectral centroid 계산 → segment 밝기
-        centroid = librosa.feature.spectral_centroid(y=seg, sr=sr)
-        # 2D배열을 하나의 밝기 대표값으로 만들기 위해 평균값으로 변환
+        # 밝기 계산
+        # centroid는 librosa에서 제공하는 특징값으로, 밝기와 연관되어 있어 참고하여 사용
+        centroid = librosa.feature.spectral_centroid(y=seg, sr=sr) # 참고하여 적용한 부분
         brightness = float(np.mean(centroid))
+        brightness_list.append(brightness)
 
-        brightness_values.append(brightness)
+        # 에너지 계산
+        # 음향에서 기본적으로 사용하는 에너지 정의 참조하여 사용
+        energy = float(np.sum(np.abs(seg))) # 참고하여 적용한 부분
+        energy_list.append(energy)
 
-        # 에너지
-        energy = float(np.sum(np.abs(seg)))
-        energy_value.append(energy)
-
-    # tempo 추출
-    tempo, _ = librosa.beat.beat_track(y = y, sr = sr)
-
-    # segment별 brightness 리스트 반환
-    return brightness_values, tempo, energy_value
+    # 두 리스트 반환
+    return brightness_list, energy_list
