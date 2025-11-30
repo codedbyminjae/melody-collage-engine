@@ -29,8 +29,7 @@ def segment_audio(audio_path, segment_duration=0.5):
         brightness_list.append(brightness)
 
         # 에너지 계산
-        # 음향에서 기본적으로 사용하는 에너지 정의 참조하여 사용
-        energy = float(np.sum(np.abs(seg))) # 참고하여 적용한 부분
+        energy = float(np.sum(np.abs(seg))) # 에너지 변환 참조 코드
         energy_list.append(energy)
 
     # 두 리스트 반환
