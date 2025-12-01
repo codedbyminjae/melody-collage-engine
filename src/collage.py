@@ -5,7 +5,7 @@ import random
 # 회전 함수 (energy 기반 회전폭)
 def rotate_image(img, angle):
     h, w = img.shape[:2]
-    M = cv2.getRotationMatrix2D((w // 2, h // 2), angle, 1.0)
+    M = cv2.getRotationMatrix2D((w // 2, h // 2), angle, 1.0) # OpenCV 기본 회전 공식 참조 (강의 내용기반)
     return cv2.warpAffine(img, M, (w, h), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT)
 
 # 알파 블렌딩
@@ -14,7 +14,7 @@ def alpha_blend(canvas, img, x, y, alpha):
     H, W = canvas.shape[:2]
 
     roi = canvas[y:y+h, x:x+w]
-    blended = (roi * (1 - alpha) + img * alpha).astype(np.uint8)  # 배경과 로고 부분 코드 참조
+    blended = (roi * (1 - alpha) + img * alpha).astype(np.uint8)  # 기본 알파 블렌딩 공식 참고
     canvas[y:y+h, x:x+w] = blended
     return canvas
 
