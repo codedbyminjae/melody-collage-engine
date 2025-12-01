@@ -12,7 +12,7 @@ def rotate_ui(input_path, output_path):
     cv2.imshow("Preview", disp)
     cv2.moveWindow("Preview", 100, 100)
 
-    # 마우스 클릭 이벤트
+    # 마우스 클릭 이벤트 (교재 참고)
     def on_mouse(event, x, y, flags, param):
         nonlocal preview, angle
         if event == cv2.EVENT_LBUTTONDOWN:
