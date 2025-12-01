@@ -11,7 +11,7 @@ def compute_brightness(brightness_list, min_scale = 0.7, max_scale = 1.8):
         if b_max == b_min: # 값이 같을때의 예외처리 (분모가 0인 경우)
             norm = 0.5
         else:
-            norm = (b - b_min) / (b_max - b_min)
+            norm = (b - b_min) / (b_max - b_min) # 정규화 과정은 기본공식 참조
 
         # 정규화값을 scale 범위로 매핑 (0.7 ~ 1.8 사이)
         scale = min_scale + norm * (max_scale - min_scale)
@@ -33,7 +33,7 @@ def compute_energy(energy_list, min_rot = 10, max_rot = 35):
         if e_max == e_min:
             norm = 0.5
         else:
-            norm = (e - e_min) / (e_max - e_min)
+            norm = (e - e_min) / (e_max - e_min) # 정규화 과정은 기본공식 참조
 
         energy = min_rot + norm * (max_rot - min_rot)
         rotation_list.append(energy)
