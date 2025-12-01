@@ -1,7 +1,7 @@
 import os
 import cv2
 
-def load_images(folder, target=240, resize=256):
+def load_images(folder, target, resize):
     
     images = [] # 이미지 리스트 생성
 
