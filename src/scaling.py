@@ -1,4 +1,4 @@
-def compute_scale(brightness_list, min_scale=0.7, max_scale=1.8):
+def compute_brightness(brightness_list, min_scale = 0.7, max_scale = 1.8):
 
     # brightness 최소/최대 계산
     b_min = min(brightness_list)
@@ -19,3 +19,23 @@ def compute_scale(brightness_list, min_scale=0.7, max_scale=1.8):
 
     # segment별 scale 리스트 반환
     return scale_list
+
+def compute_energy(energy_list, min_rot = 10, max_rot = 35):
+
+    # energy 최소/최대 계산
+    e_min = min(energy_list)
+    e_max = max(energy_list)
+
+    rotation_list = []
+
+    for e in energy_list:
+        # energy 0~1 사이의 값으로 정규화
+        if e_max == e_min:
+            norm = 0.5
+        else:
+            norm = (e - e_min) / (e_max - e_min)
+
+        energy = min_rot + norm * (max_rot - min_rot)
+        rotation_list.append(energy)
+
+    return rotation_list
