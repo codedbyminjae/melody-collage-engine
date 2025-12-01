@@ -39,15 +39,15 @@ def build_collage(images, scale_list, rotation_list, canvas_w, canvas_h):
         angle = direction * real_rot # 최종 회전 각도
         img = rotate_image(img, angle)
 
-        # 4) 위치는 완전 랜덤 (단순화)
+        # 3) 위치는 완전 랜덤 (단순화)
         x = random.randint(0, canvas_w - size)
         y = random.randint(0, canvas_h - size)
 
-        # 5) 알파 값
+        # 4) 알파 값
         alpha = 0.55 + scale * 0.20
         alpha = max(0.4, min(alpha, 0.9)) # 클램핑 과정
 
-        # 6) 합성
+        # 5) 합성
         canvas = alpha_blend(canvas, img, x, y, alpha)
 
     return canvas
