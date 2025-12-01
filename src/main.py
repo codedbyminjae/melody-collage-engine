@@ -5,6 +5,7 @@ from audio import segment_audio
 from image import load_images
 from scaling import compute_brightness, compute_energy
 from collage import build_collage
+from ui import rotate_ui
 
 print("Melody Collage Engine")
 
@@ -32,12 +33,16 @@ print("\n콜라주 생성 시작")
 canvas = build_collage(images, scale_list, rotation_list, canvas_w=1920, canvas_h=1080)
 print("콜라주 생성 완료")
 
-# 5. 저장
-print("\n결과 저장")
+cv2.destroyAllWindows()
 
-os.makedirs("../results", exist_ok=True)
+# 5. 저장
 result_path = "../results/collage_result.jpg"
 cv2.imwrite(result_path, canvas)
+print("\n결과 저장")
 
-print(f" - 저장 완료: {result_path}")
+# 6. 회전 ui 적용
+rotate_result_path = "../results/collage_rotate_result.jpg"
+rotate_ui(result_path, rotate_result_path)
+
+print(f"\n저장 완료: {result_path}")
 print("\n프로그램 종료")
