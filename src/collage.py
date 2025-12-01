@@ -50,4 +50,11 @@ def build_collage(images, scale_list, rotation_list, canvas_w, canvas_h):
         # 5) 합성
         canvas = alpha_blend(canvas, img, x, y, alpha)
 
+        # 6) 실시간 미리보기 생성
+        preview = cv2.resize(canvas, None, fx = 0.45, fy = 0.45)
+
+        cv2.imshow("Making Collage", preview)
+        cv2.moveWindow("Making Collage", 100, 100)
+        cv2.waitKey(10)
+
     return canvas
