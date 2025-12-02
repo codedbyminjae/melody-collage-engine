@@ -5,7 +5,7 @@ def load_images(folder, target, resize):
     
     images = [] # 이미지 리스트 생성
 
-    for file in os.listdir(folder): # 폴더 내 이미지 파일 탐색
+    for file in os.listdir(folder): # # 폴더 내 모든 이미지를 자동으로 불러오기 위해 listdir 사용 (참조부분)
         if not (file.lower().endswith(".jpg") or file.lower().endswith(".png")): # 확장자로 예외처리 (이미지만)
             continue
 

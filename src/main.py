@@ -7,7 +7,7 @@ from scaling import compute_brightness, compute_energy
 from collage import build_collage
 from ui import rotate_ui
 
-print("Melody Collage Engine")
+print("Melody Collage Engine (Local Execution)")
 
 # 1. 오디오 분석
 audio_path = "../data/music/epic1.mp3"
@@ -22,7 +22,7 @@ print("\n이미지 로드 시작")
 images = load_images("../data/images", target=301, resize=256)
 print(f" - 이미지 {len(images)}개 사용")
 
-# 3. 밝기 → 크기(scale), 에너지 → 회전(rotation)
+# 3. brightness → scale, energy → rotation
 scale_list = compute_brightness(brightness_list)
 rotation_list = compute_energy(energy_list)
 print("scale_list 계산 완료")
@@ -30,19 +30,18 @@ print("rotation_list 계산 완료")
 
 # 4. 콜라주 생성
 print("\n콜라주 생성 시작")
-canvas = build_collage(images, scale_list, rotation_list, canvas_w=1920, canvas_h=1080)
+canvas = build_collage(images, scale_list, rotation_list,
+                       canvas_w=1920, canvas_h=1080)
 print("콜라주 생성 완료")
 
-cv2.destroyAllWindows()
-
-# 5. 저장
+# 5. 결과 저장 (results 폴더 없으면 생성)
+os.makedirs("../results", exist_ok=True)
 result_path = "../results/collage_result.jpg"
 cv2.imwrite(result_path, canvas)
-print("\n결과 저장")
+print(f"\n결과 저장: {result_path}")
 
-# 6. 회전 ui 적용
+# 6. 회전 UI 적용
 rotate_result_path = "../results/collage_rotate_result.jpg"
 rotate_ui(result_path, rotate_result_path)
 
-print(f"\n저장 완료: {result_path}")
 print("\n프로그램 종료")
